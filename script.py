@@ -30,26 +30,20 @@ print("Connexion à PostgreSQL réussie")
 ser = serial.Serial(port_name, baud_rate)
 print("Port série ouvert")
 
-try:
-    # Boucle principale de lecture des données du capteur et stockage dans la base de données
-    while True:
-        # Lecture des données du capteur depuis le port série
-        data = ser.readline().decode('ascii').strip()
-        
-        # Vérification si les données sont valides
-        if data:
-            # Extraction des valeurs de capteur de distance et de toucher 
-            distance= data.split(" ")
-            
-            # Insertion des données dans la base de données
-            query = f"INSERT INTO capteur (nom_capteur) VALUES ({distance})"
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            
-            print(f"Données insérées : nom_capteur = {distance}")
-except KeyboardInterrupt:
-    # Fermeture du port série et de la connexion PostgreSQL en cas d'interruption du programme
-    ser.close()
-    conn.close()
-    print("Programme arrêté")
+while True:
+    # Lire les données des capteurs depuis l'Arduino
+    data1 = ser.readline().decode("ascii").strip()
+    data2 = ser.readline().decode("ascii").strip()
+
+    # Insérer les données dans la base de données PostgreSQL
+    query = f"INSERT INTO capteur (id_c,nom_capteur, distance) VALUES (1,'{data1}', '{data2}')"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+
+    print("Données insérées avec succès - Capteur 1 :", data1)
+    print("Données insérées avec succès - Capteur 2 :", data2)
+
+# Fermer la connexion avec la base de données PostgreSQL
+cur.close()
+conn.close()
